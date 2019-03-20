@@ -59,13 +59,21 @@ docs/latest.yaml
 # OSX
 **/.DS_Store
 
-# python cache
+# python
 __pycache__
+.tox
+.cache
+*.egg-info
 *.pyc
+*.pyo
 
-# ansible stuff
+# ansible
 ssh.config
 *.retry
+inventory/production/
+inventory/vagrant_ansible_inventory
+inventory/**/group_vars/fake_hosts.yml
+inventory/**/host_vars/
 
 # bundler
 Gemfile.lock
@@ -81,3 +89,8 @@ notebooks/.ipynb_checkpoints
 # backups
 *.backup
 *.bak
+
+# chef
+.kitchen/
+.kitchen.local.yml
+Berksfile.lock
