@@ -1,0 +1,18 @@
+solr.shift-labs.com ansible_host_ip=172.16.1.100 ansible_user=vagrant ansible_become=true
+solr2.shift-labs.com ansible_host_ip=172.16.1.101 ansible_user=vagrant ansible_become=true
+solr3.shift-labs.com ansible_host_ip=172.16.1.102 ansible_user=vagrant ansible_become=true
+
+[zookeeper]
+solr.shift-labs.com
+solr2.shift-labs.com
+solr3.shift-labs.com
+
+[solr]
+solr.shift-labs.com
+solr2.shift-labs.com
+solr3.shift-labs.com
+
+[solr_exporter]
+solr.shift-labs.com
+solr2.shift-labs.com
+solr3.shift-labs.com

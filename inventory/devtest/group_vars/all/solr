@@ -1,0 +1,64 @@
+---
+solr_package_url: "https://s3-us-west-2.amazonaws.com/shift-release-repo/solr/{{ solr_version }}/{{ solr_package_file }}"
+solr_zk_chroot: shift/solr
+solr_collections:
+  - id: logs
+    searchClusterId: search
+    commitWithin: 10000
+    auto_commit_maxtime: 300000
+    solrParams:
+      numShards: 2
+      replicationFactor: 2
+      maxShardsPerNode: 2
+    recommendationsParams:
+      idField: id
+      itemsForUser: true
+      itemsForQuery: false
+      itemsForItem: true
+      queriesForQuery: false
+    partitionByTime: false
+    searchLogs: false
+    signals: false
+    recommendations: false
+    app: shift
+    cdcr: {}
+    template: collection.json.j2
+    configset: logs
+    configset_files_dir: logs
+    configset_template_dir: logs
+    configset_templates:
+      - managed-schema
+      - solrconfig.xml
+    action: update
+  - id: shift
+    searchClusterId: default
+    commitWithin: 10000
+    auto_commit_maxtime: 300000
+    use_cold_searcher: true
+    enable_edismax: true
+    enable_spellcheck: true
+    enable_suggest: true
+    solrParams:
+      numShards: 3
+      replicationFactor: 2
+      maxShardsPerNode: 2
+    recommendationsParams:
+      idField: id
+      itemsForUser: true
+      itemsForQuery: false
+      itemsForItem: true
+      queriesForQuery: false
+    partitionByTime: false
+    searchLogs: true
+    signals: true
+    recommendations: false
+    app: shift
+    cdcr: {}
+    template: collection.json.j2
+    configset: shift
+    configset_files_dir: shift
+    configset_template_dir: shift
+    configset_templates:
+      - managed-schema
+      - solrconfig.xml
+    action: update

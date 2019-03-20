@@ -1,0 +1,19 @@
+- name: Deploy pip role
+  hosts: all
+  roles:
+    - pip
+
+- name: Deploy zookeeper role
+  hosts: all
+  roles:
+    - zookeeper
+
+- name: Deploy solr role
+  hosts: all
+  roles:
+    - solr
+
+- name: setup solr_exporter
+  hosts: solr_exporter
+  roles:
+    - prometheus

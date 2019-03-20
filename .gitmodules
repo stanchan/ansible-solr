@@ -1,0 +1,15 @@
+[submodule "roles/zookeeper"]
+	path = roles/zookeeper
+	url = https://github.com/stanchan/ansible-role-zookeeper.git
+[submodule "roles/solr"]
+	path = roles/solr
+	url = https://github.com/stanchan/ansible-role-solr.git
+[submodule "roles/pip"]
+	path = roles/pip
+	url = https://github.com/stanchan/ansible-role-pip.git
+[submodule "roles/prometheus"]
+	path = roles/prometheus
+	url = https://github.com/stanchan/ansible-role-prometheus.git
+[submodule "roles/java"]
+	path = roles/java
+	url = https://github.com/stanchan/ansible-role-java.git

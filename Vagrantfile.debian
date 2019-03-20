@@ -1,0 +1,90 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.require_version ">= 2.1.0"
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+required_plugins = %w[vagrant-hostmanager]
+
+return if !Vagrant.plugins_enabled?
+
+plugins_to_install = required_plugins.select { |plugin| !Vagrant.has_plugin? plugin }
+
+if plugins_to_install.any?
+  system "vagrant plugin install #{plugins_to_install.join(' ')}"
+  exit system 'vagrant up'
+end
+
+boxes = [
+    {
+        :name => "solr.shift-labs.com",
+        :eth1 => "172.16.1.100",
+        :mem => "2048",
+        :cpu => "1",
+        :box => "debian/stretch64"
+    },
+    {
+        :name => "solr2.shift-labs.com",
+        :eth1 => "172.16.1.101",
+        :mem => "2048",
+        :cpu => "1",
+        :box => "debian/stretch64"
+    },
+    {
+        :name => "solr3.shift-labs.com",
+        :eth1 => "172.16.1.102",
+        :mem => "2048",
+        :cpu => "1",
+        :box => "debian/stretch64"
+    }
+]
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+  config.hostmanager.manage_guest = true
+  config.hostmanager.ignore_private_ip = false
+
+  boxes.each_with_index do |options, index|
+
+    config.vm.define options[:name] do |config|
+      config.vm.box = options[:box]
+      config.ssh.insert_key = false
+      config.vm.hostname = options[:name]
+      config.vm.provider "virtualbox" do |v|
+        v.name = options[:name]
+        v.customize ["modifyvm", :id, "--memory", options[:mem]]
+        v.customize ["modifyvm", :id, "--cpus", options[:cpu]]
+        v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        v.customize ["modifyvm", :id, "--ioapic", "on"]
+        v.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000]
+        v.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-interval", 10000]
+        v.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-min-adjust", 100]
+        v.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-on-restore", 1]
+      end
+      config.vm.network :private_network, ip: options[:eth1]
+
+      if index == 0
+        config.vm.network "forwarded_port", guest: 2181, host: 2181
+        config.vm.network "forwarded_port", guest: 8983, host: 8983
+        config.vm.network "forwarded_port", guest: 9081, host: 9081
+        config.vm.network "forwarded_port", guest: 9231, host: 9231
+        config.vm.network "forwarded_port", guest: 10081, host: 10081
+        config.vm.network "forwarded_port", guest: 10082, host: 10082
+      end
+
+      if index == boxes.size - 1
+        config.vm.provision "ansible" do |ansible|
+          ansible.playbook = "solr.yml"
+          ansible.limit = "all"
+          ansible.inventory_path = "inventory/devtest/hosts"
+          ansible.host_key_checking = false
+          ansible.verbose = "v"
+        end
+      end
+    end
+  end
+end
