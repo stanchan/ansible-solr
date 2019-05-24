@@ -1,5 +1,9 @@
 - name: Deploy pip role
   hosts: all
+  vars:
+    pip_packages:
+      - name: jmespath
+      - name: kazoo
   roles:
     - pip
 
