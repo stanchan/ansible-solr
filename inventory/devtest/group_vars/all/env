@@ -1,5 +1,4 @@
 ---
-
 zookeeper_netif: ansible_eth1
 zookeeper_clean: false
 solr_netif: ansible_eth1
