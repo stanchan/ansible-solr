@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant.require_version ">= 2.1.0"
+Vagrant.require_version ">= 2.0.0"
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
@@ -23,21 +23,21 @@ boxes = [
         :eth1 => "172.16.1.100",
         :mem => "2048",
         :cpu => "1",
-        :box => "debian/stretch64"
+        :box => "stanchan/debian9"
     },
     {
         :name => "solr2.shift-labs.com",
         :eth1 => "172.16.1.101",
         :mem => "2048",
         :cpu => "1",
-        :box => "debian/stretch64"
+        :box => "stanchan/debian9"
     },
     {
         :name => "solr3.shift-labs.com",
         :eth1 => "172.16.1.102",
         :mem => "2048",
         :cpu => "1",
-        :box => "debian/stretch64"
+        :box => "stanchan/debian9"
     }
 ]
 
@@ -53,13 +53,25 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.define options[:name] do |config|
       config.vm.box = options[:box]
       config.ssh.insert_key = false
+      config.ssh.private_key_path = ['~/.vagrant.d/insecure_private_key', '~/.ssh/id_rsa']
+      config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
+
+      config.vm.provision "shell", inline: <<-EOC
+        sudo sed -i -e "\\#PasswordAuthentication yes# s#PasswordAuthentication yes#PasswordAuthentication no#g" /etc/ssh/sshd_config
+        sudo systemctl restart sshd.service
+        echo "Restarted sshd!"
+      EOC
+
       config.vm.hostname = options[:name]
       config.vm.provider "virtualbox" do |v|
         v.name = options[:name]
         v.customize ["modifyvm", :id, "--memory", options[:mem]]
         v.customize ["modifyvm", :id, "--cpus", options[:cpu]]
+        v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
         v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
         v.customize ["modifyvm", :id, "--ioapic", "on"]
+        v.customize ["modifyvm", :id, "--nictype1", "virtio" ]
+        v.customize ["modifyvm", :id, "--nictype2", "virtio" ]
         v.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000]
         v.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-interval", 10000]
         v.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-min-adjust", 100]
